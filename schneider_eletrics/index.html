@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schneider Electric | Carregamento EV para Edifícios</title>
+    <style>
+        :root {
+            --schneider-green: #009966;
+            --schneider-dark: #1D1D1B;
+            --schneider-light: #F4F4F4;
+            --text-color: #333;
+            --white: #ffffff;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--white);
+            color: var(--text-color);
+            overflow-x: hidden;
+        }
+
+        /* Header & Nav */
+        header {
+            background-color: var(--white);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            transition: var(--transition);
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--schneider-dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo span {
+            color: var(--schneider-green);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--schneider-dark);
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .nav-links a:hover {
+            color: var(--schneider-green);
+        }
+
+        .btn-primary {
+            background-color: var(--schneider-green);
+            color: var(--white);
+            padding: 0.8rem 1.5rem;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-primary:hover {
+            background-color: #007a52;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 153, 102, 0.3);
+        }
+
+        /* Hero Section */
+        .hero {
+            height: 90vh;
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://images.unsplash.com/photo-1593941707882-a5bba14938c7?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: var(--white);
+            padding-top: 60px;
+        }
+
+        .hero-content {
+            max-width: 800px;
+            padding: 2rem;
+            opacity: 0;
+            animation: fadeInUp 1s forwards;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        /* Products Section */
+        .section {
+            padding: 5rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .section-title h2 {
+            font-size: 2.5rem;
+            color: var(--schneider-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .section-title .line {
+            width: 60px;
+            height: 4px;
+            background-color: var(--schneider-green);
+            margin: 0 auto;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .product-card {
+            background: var(--white);
+            border: 1px solid #eee;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .product-card:hover {
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            transform: translateY(-5px);
+        }
+
+        .product-image {
+            height: 250px;
+            background-color: #f9f9f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .product-image img {
+            max-width: 80%;
+            max-height: 80%;
+            object-fit: contain;
+        }
+
+        .product-info {
+            padding: 1.5rem;
+        }
+
+        .product-tag {
+            background-color: #e6f7f2;
+            color: var(--schneider-green);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 0.5rem;
+        }
+
+        .product-title {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+            color: var(--schneider-dark);
+        }
+
+        .product-desc {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .product-price {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--schneider-dark);
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        /* Installation Service Section */
+        .installation-section {
+            background-color: var(--schneider-light);
+        }
+
+        .install-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .install-text {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .install-form-wrapper {
+            flex: 1;
+            min-width: 300px;
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .feature-list {
+            list-style: none;
+            margin-top: 1.5rem;
+        }
+
+        .feature-list li {
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .feature-icon {
+            color: var(--schneider-green);
+            font-weight: bold;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--schneider-green);
+            box-shadow: 0 0 0 2px rgba(0, 153, 102, 0.2);
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--schneider-dark);
+            color: var(--white);
+            padding: 4rem 2rem 2rem;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-col h4 {
+            margin-bottom: 1.5rem;
+            color: var(--schneider-green);
+        }
+
+        .footer-col ul {
+            list-style: none;
+        }
+
+        .footer-col ul li {
+            margin-bottom: 0.8rem;
+        }
+
+        .footer-col a {
+            color: #ccc;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .footer-col a:hover {
+            color: var(--white);
+        }
+
+        .copyright {
+            text-align: center;
+            border-top: 1px solid #333;
+            padding-top: 2rem;
+            font-size: 0.9rem;
+            color: #888;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in-scroll {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+
+        .fade-in-scroll.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Modal Notification */
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--schneider-dark);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.4s ease;
+            z-index: 2000;
+            border-left: 4px solid var(--schneider-green);
+        }
+
+        .notification.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            /* Simplified for demo */
+            .install-container {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Header -->
+    <header id="header">
+        <nav>
+            <div class="logo">
+                <span style="font-size: 2rem;"></span> Schneider <span>Electric</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#produtos">Carregadores</a></li>
+                <li><a href="#instalacao">Instalação</a></li>
+                <li><a href="#condominios">Condomínios</a></li>
+                <li><a href="#suporte">Suporte</a></li>
+            </ul>
+            <button class="btn-primary" onclick="scrollToInstall()">Solicitar Orçamento</button>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>O Futuro da Mobilidade Elétrica Começa em Casa</h1>
+            <p>Soluções inteligentes de carregamento para residências e condomínios. Eficiência energética, segurança e
+                conectividade com a Schneider Electric.</p>
+            <a href="#produtos" class="btn-primary" style="padding: 1rem 2rem; font-size: 1.1rem;">Ver Produtos</a>
+        </div>
+    </section>
+
+    <!-- Products Section -->
+    <section id="produtos" class="section">
+        <div class="section-title fade-in-scroll">
+            <h2>Linha EVlink</h2>
+            <div class="line"></div>
+            <p style="margin-top: 1rem; color: #666;">Tecnologia de ponta para carregamento seguro e eficiente.</p>
+        </div>
+
+        <div class="products-grid">
+            <!-- Product 1 -->
+            <div class="product-card fade-in-scroll">
+                <div class="product-image">
+                    <!-- Placeholder image using unsplash source for demo purposes -->
+                    <img src="https://images.unsplash.com/photo-1558467563-2427164586a0?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80"
+                        alt="EVlink Home">
+                </div>
+                <div class="product-info">
+                    <span class="product-tag">Residencial</span>
+                    <h3 class="product-title">EVlink Home Wallbox</h3>
+                    <p class="product-desc">Carregador inteligente de até 22kW. Controle via app, agendamento de carga e
+                        integração com energia solar.</p>
+                    <span class="product-price">R$ 4.290,00</span>
+                    <button class="btn-primary" style="width: 100%"
+                        onclick="addToQuote('EVlink Home Wallbox')">Adicionar ao Orçamento</button>
+                </div>
+            </div>
+
+            <!-- Product 2 -->
+            <div class="product-card fade-in-scroll">
+                <div class="product-image">
+                    <img src="https://images.unsplash.com/photo-1593941707882-a5bba14938c7?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80"
+                        alt="EVlink Pro">
+                </div>
+                <div class="product-info">
+                    <span class="product-tag">Comercial / Condomínio</span>
+                    <h3 class="product-title">EVlink Pro AC</h3>
+                    <p class="product-desc">Solução robusta para áreas comuns. Gestão de múltiplos pontos, balanceamento
+                        de carga e acesso por RFID.</p>
+                    <span class="product-price">R$ 6.850,00</span>
+                    <button class="btn-primary" style="width: 100%" onclick="addToQuote('EVlink Pro AC')">Adicionar ao
+                        Orçamento</button>
+                </div>
+            </div>
+
+            <!-- Product 3 -->
+            <div class="product-card fade-in-scroll">
+                <div class="product-image">
+                    <img src="https://images.unsplash.com/photo-1565514020176-db793643c681?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80"
+                        alt="Accessories">
+                </div>
+                <div class="product-info">
+                    <span class="product-tag">Acessórios</span>
+                    <h3 class="product-title">Kit Proteção & Cabos</h3>
+                    <p class="product-desc">Cabos de alta durabilidade, suportes de parede e disjuntores específicos
+                        para proteção do veículo e da rede.</p>
+                    <span class="product-price">A partir de R$ 890,00</span>
+                    <button class="btn-primary" style="width: 100%"
+                        onclick="addToQuote('Kit Proteção & Cabos')">Adicionar ao Orçamento</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Installation Service Section -->
+    <section id="instalacao" class="section installation-section">
+        <div class="section-title fade-in-scroll">
+            <h2>Instalação Certificada</h2>
+            <div class="line"></div>
+        </div>
+
+        <div class="install-container">
+            <div class="install-text fade-in-scroll">
+                <h3>Não compre apenas o produto, garanta a segurança.</h3>
+                <p style="margin-top: 1rem; color: #555; line-height: 1.6;">
+                    A instalação de carregadores elétricos exige cuidados específicos com a rede elétrica, aterramento e
+                    proteções. Nossa equipe certificada garante que seu equipamento opere com máxima eficiência e
+                    segurança.
+                </p>
+
+                <ul class="feature-list">
+                    <li><span class="feature-icon">✓</span> Visita técnica prévia inclusa</li>
+                    <li><span class="feature-icon">✓</span> Projetos elétricos adequados à norma NBR 5410</li>
+                    <li><span class="feature-icon">✓</span> Configuração do aplicativo e conectividade</li>
+                    <li><span class="feature-icon">✓</span> Garantia estendida na mão de obra</li>
+                    <li><span class="feature-icon">✓</span> Integração com sistemas de automação predial</li>
+                </ul>
+            </div>
+
+            <div class="install-form-wrapper fade-in-scroll">
+                <h3 style="margin-bottom: 1.5rem;">Solicite seu Orçamento</h3>
+                <form id="quoteForm" onsubmit="handleFormSubmit(event)">
+                    <div class="form-group">
+                        <label for="name">Nome Completo</label>
+                        <input type="text" id="name" class="form-control" required placeholder="Seu nome">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">E-mail</label>
+                        <input type="email" id="email" class="form-control" required placeholder="seu@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Telefone / WhatsApp</label>
+                        <input type="tel" id="phone" class="form-control" required placeholder="(00) 00000-0000">
+                    </div>
+                    <div class="form-group">
+                        <label for="type">Tipo de Local</label>
+                        <select id="type" class="form-control">
+                            <option value="residential">Residência (Casa)</option>
+                            <option value="condo">Condomínio (Vaga Privativa)</option>
+                            <option value="commercial">Área Comum / Comercial</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="message">Observações (Opcional)</label>
+                        <textarea id="message" class="form-control" rows="3"
+                            placeholder="Ex: Tenho um Tesla Model 3..."></textarea>
+                    </div>
+
+                    <div id="selected-products-display"
+                        style="background: #f0f0f0; padding: 10px; border-radius: 4px; margin-bottom: 15px; display: none;">
+                        <small style="color: #666; font-weight: bold;">Itens selecionados:</small>
+                        <ul id="quote-list" style="list-style: none; margin-top: 5px; font-size: 0.9rem;"></ul>
+                    </div>
+
+                    <button type="submit" class="btn-primary" style="width: 100%;">Enviar Solicitação</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Condominiums Specific Section -->
+    <section id="condominios" class="section">
+        <div class="section-title fade-in-scroll">
+            <h2>Soluções para Condomínios</h2>
+            <div class="line"></div>
+        </div>
+        <div style="display: flex; gap: 2rem; flex-wrap: wrap; justify-content: center;">
+            <div class="product-card fade-in-scroll"
+                style="flex: 1; min-width: 300px; border: none; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+                <div class="product-info">
+                    <h3 class="product-title">Gestão de Energia</h3>
+                    <p class="product-desc">Evite a sobrecarga da rede do condomínio. Nosso sistema limita a potência
+                        total distribuída entre os carros, priorizando quem precisa carregar mais rápido.</p>
+                </div>
+            </div>
+            <div class="product-card fade-in-scroll"
+                style="flex: 1; min-width: 300px; border: none; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+                <div class="product-info">
+                    <h3 class="product-title">Cobrança Automatizada</h3>
+                    <p class="product-desc">Sistema de tag RFID ou App. O morador passa o cartão, carrega, e o valor é
+                        debitado automaticamente da taxa condominial ou conta digital.</p>
+                </div>
+            </div>
+            <div class="product-card fade-in-scroll"
+                style="flex: 1; min-width: 300px; border: none; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+                <div class="product-info">
+                    <h3 class="product-title">Manutenção Preditiva</h3>
+                    <p class="product-desc">Monitoramento remoto 24/7. Sabemos se um carregador falhou antes mesmo do
+                        morador avisar, garantindo alta disponibilidade.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-col">
+                <div class="logo" style="color: white; margin-bottom: 1rem;">
+                    <span style="color: var(--schneider-green);">❖</span> Schneider <span>Electric</span>
+                </div>
+                <p style="color: #aaa; font-size: 0.9rem;">Liderando a transformação digital da gestão de energia e
+                    automação para um futuro mais sustentável.</p>
+            </div>
+            <div class="footer-col">
+                <h4>Produtos</h4>
+                <ul>
+                    <li><a href="#">Wallbox Residencial</a></li>
+                    <li><a href="#">Carregadores Comerciais</a></li>
+                    <li><a href="#">Disjuntores e Proteção</a></li>
+                    <li><a href="#">Automação Predial</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Suporte</h4>
+                <ul>
+                    <li><a href="#">Encontre um Instalador</a></li>
+                    <li><a href="#">Garantia e Registro</a></li>
+                    <li><a href="#">Downloads e Manuais</a></li>
+                    <li><a href="#">Fale Conosco</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Contato</h4>
+                <ul>
+                    <li>0800 123 4567</li>
+                    <li>contato@schneider-electric.com.br</li>
+                    <li>Av. Paulista, 1000 - São Paulo, SP</li>
+                </ul>
+            </div>
+        </div>
+        <div class="copyright">
+            &copy; 2026 Schneider Electric. Todos os direitos reservados. Property of Schneider Electric.
+        </div>
+    </footer>
+
+    <!-- Notification Toast -->
+    <div id="notification" class="notification">
+        Item adicionado ao orçamento com sucesso!
+    </div>
+
+    <script>
+        // Smooth Scroll for Anchor Links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        // Scroll Animation Observer
+        const observerOptions = {
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.fade-in-scroll').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Header Background Change on Scroll
+        window.addEventListener('scroll', () => {
+            const header = document.getElementById('header');
+            if (window.scrollY > 50) {
+                header.style.boxShadow = "0 2px 10px rgba(0,0,0,0.1)";
+            } else {
+                header.style.boxShadow = "none";
+            }
+        });
+
+        // Quote Logic
+        let quoteItems = [];
+
+        function addToQuote(productName) {
+            if (!quoteItems.includes(productName)) {
+                quoteItems.push(productName);
+                updateQuoteDisplay();
+                showNotification(`"${productName}" adicionado ao orçamento.`);
+            } else {
+                showNotification("Este item já está no seu orçamento.");
+            }
+        }
+
+        function updateQuoteDisplay() {
+            const display = document.getElementById('selected-products-display');
+            const list = document.getElementById('quote-list');
+
+            if (quoteItems.length > 0) {
+                display.style.display = 'block';
+                list.innerHTML = '';
+                quoteItems.forEach(item => {
+                    const li = document.createElement('li');
+                    li.textContent = `• ${item}`;
+                    list.appendChild(li);
+                });
+            } else {
+                display.style.display = 'none';
+            }
+        }
+
+        function scrollToInstall() {
+            document.getElementById('instalacao').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function handleFormSubmit(e) {
+            e.preventDefault();
+
+            // Simulate API Call / Processing
+            const btn = e.target.querySelector('button[type="submit"]');
+            const originalText = btn.innerText;
+
+            btn.innerText = "Enviando...";
+            btn.disabled = true;
+            btn.style.opacity = "0.7";
+
+            setTimeout(() => {
+                alert("Obrigado! Sua solicitação de orçamento foi recebida. Um especialista Schneider entrará em contato em breve.");
+
+                // Reset Form
+                e.target.reset();
+                quoteItems = [];
+                updateQuoteDisplay();
+
+                btn.innerText = originalText;
+                btn.disabled = false;
+                btn.style.opacity = "1";
+            }, 1500);
+        }
+
+        function showNotification(message) {
+            const notif = document.getElementById('notification');
+            notif.innerText = message;
+            notif.classList.add('show');
+
+            setTimeout(() => {
+                notif.classList.remove('show');
+            }, 3000);
+        }
+    </script>
+</body>
+
+</html>
