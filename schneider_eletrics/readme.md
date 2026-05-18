@@ -27,5 +27,5 @@ Monitoramento (Cloud Telemetry): Tudo é registrado na nuvem para o síndico ver
 
 <img width="979" height="542" alt="image" src="https://github.com/user-attachments/assets/a683fd1d-3829-4128-848f-8ba79bc92515" />
 
-
+by k.
 
