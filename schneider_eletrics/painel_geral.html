@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schneider Electric | Painel Geral de Balanceamento</title>
+    <style>
+        :root {
+            --schneider-green: #009966;
+            --schneider-dark: #1D1D1B;
+            --bg-light: #F4F6F8;
+            --white: #ffffff;
+            --danger: #e74c3c;
+            --warning: #f1c40f;
+            --blue: #3498db;
+        }
+
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg-light); margin: 0; padding: 20px; color: var(--schneider-dark); }
+        
+        /* Layout */
+        .container { max-width: 1000px; margin: 0 auto; }
+        
+        /* Header Panel Status */
+        .main-panel {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            border-top: 5px solid var(--schneider-green);
+        }
+
+        .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+        .panel-title h2 { margin: 0; font-size: 1.5rem; }
+        .panel-status { font-weight: bold; padding: 5px 15px; border-radius: 20px; background: #e6f7f2; color: var(--schneider-green); }
+
+        /* Capacity Bar */
+        .capacity-container { margin-bottom: 1rem; }
+        .capacity-labels { display: flex; justify-content: space-between; margin-bottom: 5px; font-weight: 600; }
+        .progress-bg { width: 100%; height: 25px; background: #eee; border-radius: 12px; overflow: hidden; position: relative; }
+        .progress-fill { height: 100%; background: var(--schneider-green); width: 0%; transition: width 0.5s ease, background 0.3s; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.8rem; font-weight: bold; }
+        .progress-fill.warning { background: var(--warning); color: #333; }
+        .progress-fill.danger { background: var(--danger); }
+
+        /* Grid de Vagas */
+        .spots-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; }
+        
+        .spot-card {
+            background: var(--white);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border-left: 4px solid #ccc;
+            transition: all 0.3s;
+        }
+        
+        .spot-card.active { border-left-color: var(--schneider-green); }
+        .spot-card.reduced { border-left-color: var(--warning); }
+        
+        .spot-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+        .spot-id { font-weight: bold; font-size: 1.1rem; }
+        
+        /* Toggle Switch */
+        .switch { position: relative; display: inline-block; width: 40px; height: 20px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 20px; }
+        .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--schneider-green); }
+        input:checked + .slider:before { transform: translateX(20px); }
+
+        /* Dynamic Power Display */
+        .power-display { text-align: center; margin: 1rem 0; }
+        .kw-value { font-size: 2rem; font-weight: 700; color: var(--schneider-dark); display: block; }
+        .kw-label { font-size: 0.8rem; color: #666; text-transform: uppercase; }
+        
+        .status-text { font-size: 0.85rem; color: #666; text-align: center; margin-top: 0.5rem; }
+
+        /* Controls */
+        .controls { margin-top: 2rem; text-align: center; }
+        .btn-reset { background: var(--schneider-dark); color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    
+    <!-- PAINEL GERAL -->
+    <div class="main-panel">
+        <div class="panel-header">
+            <div class="panel-title">
+                <h2>Painel Geral de Distribuição</h2>
+                <p style="color: #666; font-size: 0.9rem;">Schneider EVlink Controller - Balanceamento Dinâmico</p>
+            </div>
+            <div class="panel-status">Sistema Online</div>
+        </div>
+
+        <div class="capacity-container">
+            <div class="capacity-labels">
+                <span>Carga Total Atual</span>
+                <span id="total-load-text">0 kW / 40 kW</span>
+            </div>
+            <div class="progress-bg">
+                <div class="progress-fill" id="capacity-bar">0%</div>
+            </div>
+            <p style="font-size: 0.8rem; color: #888; margin-top: 5px;">
+                *Limite contratual do condomínio: 40kW. O sistema ajusta automaticamente a vazão por vaga para não ultrapassar este limite.
+            </p>
+        </div>
+    </div>
+
+    <!-- VAGAS -->
+    <div class="spots-grid" id="spots-container">
+        <!-- As vagas serão geradas via JS -->
+    </div>
+
+    <div class="controls">
+        <button class="btn-reset" onclick="resetSimulation()">Reiniciar Simulação</button>
+    </div>
+
+</div>
+
+<script>
+    // Configurações do Sistema
+    const MAX_CAPACITY = 40; // kW totais disponíveis no prédio
+    const MAX_PER_SPOT = 7.4; // kW máximos por carregador (Monofásico padrão)
+    const NUM_SPOTS = 8; // Número de vagas no condomínio
+
+    let spots = [];
+
+    // Inicialização
+    function init() {
+        const container = document.getElementById('spots-container');
+        container.innerHTML = '';
+        spots = [];
+
+        for (let i = 1; i <= NUM_SPOTS; i++) {
+            // Cria objeto da vaga
+            spots.push({
+                id: i,
+                active: false,
+                currentPower: 0,
+                requestedPower: MAX_PER_SPOT
+            });
+
+            // Cria HTML da vaga
+            const div = document.createElement('div');
+            div.className = 'spot-card';
+            div.id = `spot-${i}`;
+            div.innerHTML = `
+                <div class="spot-header">
+                    <span class="spot-id">Vaga ${i}</span>
+                    <label class="switch">
+                        <input type="checkbox" onchange="toggleSpot(${i}, this.checked)">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="power-display">
+                    <span class="kw-value" id="kw-${i}">0.0</span>
+                    <span class="kw-label">kW</span>
+                </div>
+                <div class="status-text" id="status-${i}">Desconectado</div>
+            `;
+            container.appendChild(div);
+        }
+        updateSystem();
+    }
+
+    // Liga/Desliga Vaga
+    function toggleSpot(id, isActive) {
+        const spot = spots.find(s => s.id === id);
+        spot.active = isActive;
+        
+        const card = document.getElementById(`spot-${id}`);
+        if(isActive) {
+            card.classList.add('active');
+            document.getElementById(`status-${id}`).innerText = "Solicitando Carga...";
+        } else {
+            card.classList.remove('active', 'reduced');
+            document.getElementById(`status-${id}`).innerText = "Desconectado";
+        }
+        updateSystem();
+    }
+
+    // Cérebro do Sistema (Balanceamento)
+    function updateSystem() {
+        // 1. Contar quantos estão ativos
+        const activeSpots = spots.filter(s => s.active);
+        const numActive = activeSpots.length;
+
+        // 2. Calcular distribuição
+        let powerPerSpot = 0;
+        
+        if (numActive === 0) {
+            powerPerSpot = 0;
+        } else {
+            // Tenta dar o máximo para todos
+            let totalNeeded = numActive * MAX_PER_SPOT;
+
+            if (totalNeeded <= MAX_CAPACITY) {
+                // Cabe todo mundo no máximo
+                powerPerSpot = MAX_PER_SPOT;
+            } else {
+                // Não cabe! Divide o bolo igualmente (Balanceamento Simétrico)
+                powerPerSpot = MAX_CAPACITY / numActive;
+            }
+        }
+
+        // 3. Atualizar UI e Objetos
+        let totalLoad = 0;
+
+        spots.forEach(spot => {
+            const kwEl = document.getElementById(`kw-${spot.id}`);
+            const statusEl = document.getElementById(`status-${spot.id}`);
+            const cardEl = document.getElementById(`spot-${spot.id}`);
+
+            if (spot.active) {
+                // Arredonda para 1 casa decimal
+                spot.currentPower = parseFloat(powerPerSpot.toFixed(1));
+                totalLoad += spot.currentPower;
+                
+                kwEl.innerText = spot.currentPower;
+                
+                if (spot.currentPower < MAX_PER_SPOT) {
+                    statusEl.innerText = "⚠️ Potência Reduzida (Balanceamento)";
+                    statusEl.style.color = "#d35400";
+                    cardEl.classList.add('reduced');
+                } else {
+                    statusEl.innerText = "✅ Carga Plena";
+                    statusEl.style.color = "#009966";
+                    cardEl.classList.remove('reduced');
+                }
+            } else {
+                spot.currentPower = 0;
+                kwEl.innerText = "0.0";
+            }
+        });
+
+        // 4. Atualizar Barra Geral
+        const percentage = (totalLoad / MAX_CAPACITY) * 100;
+        const bar = document.getElementById('capacity-bar');
+        const loadText = document.getElementById('total-load-text');
+
+        bar.style.width = `${percentage}%`;
+        bar.innerText = `${Math.round(percentage)}%`;
+        loadText.innerText = `${totalLoad.toFixed(1)} kW / ${MAX_CAPACITY} kW`;
+
+        // Muda cor da barra se estiver perto do limite
+        bar.classList.remove('warning', 'danger');
+        if (percentage > 95) {
+            bar.classList.add('danger');
+            loadText.style.color = "var(--danger)";
+        } else if (percentage > 80) {
+            bar.classList.add('warning');
+            loadText.style.color = "#d35400";
+        } else {
+            loadText.style.color = "var(--schneider-dark)";
+        }
+    }
+
+    function resetSimulation() {
+        init();
+    }
+
+    // Inicia ao carregar
+    window.onload = init;
+
+</script>
+
+</body>
+</html>
