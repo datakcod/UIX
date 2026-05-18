@@ -12,6 +12,7 @@ Caminho da Esquerda (Não): Se há energia sobrando no prédio, o sistema libera
 mais rápido possível.
 
 Caminho da Direita (Sim): Se ligar esse carro vai estourar o limite do disjuntor geral, o sistema ativa o Algoritmo de Balanceamento.
+
 Algoritmo Inteligente:
 
 Ele calcula quem tem prioridade (ex: quem chegou primeiro ou quem está com bateria mais baixa).
