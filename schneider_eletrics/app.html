@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schneider Electric | App EV Ready - Gestão Condominial</title>
+    <style>
+        :root {
+            --schneider-green: #009966;
+            --schneider-dark: #1D1D1B;
+            --bg-light: #F4F6F8;
+            --white: #ffffff;
+            --danger: #e74c3c;
+            --warning: #f1c40f;
+            --text-gray: #666;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-light);
+            color: var(--schneider-dark);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* --- LOGIN SCREEN STYLES --- */
+        #login-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--schneider-dark), #2c3e50);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .login-card {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        .login-logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 2rem;
+            color: var(--schneider-dark);
+        }
+
+        .login-logo span {
+            color: var(--schneider-green);
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #555;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: 0.2s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: var(--schneider-green);
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 0.8rem;
+            background: var(--schneider-green);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-login:hover {
+            background: #007a52;
+        }
+
+        .error-msg {
+            color: var(--danger);
+            font-size: 0.85rem;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        /* --- DASHBOARD STYLES --- */
+        #app-container {
+            display: none;
+            height: 100%;
+        }
+
+        /* Hidden by default */
+
+        .layout-wrapper {
+            display: flex;
+            height: 100%;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background: var(--white);
+            border-right: 1px solid #eee;
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem;
+        }
+
+        .logo {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo span {
+            color: var(--schneider-green);
+        }
+
+        .nav-menu {
+            list-style: none;
+            flex-grow: 1;
+        }
+
+        .nav-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0.8rem 1rem;
+            text-decoration: none;
+            color: var(--text-gray);
+            border-radius: 8px;
+            transition: 0.2s;
+            cursor: pointer;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            background-color: #e6f7f2;
+            color: var(--schneider-green);
+            font-weight: 600;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-top: 1rem;
+            border-top: 1px solid #eee;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            background: var(--schneider-dark);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex-grow: 1;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .page-title h1 {
+            font-size: 1.5rem;
+        }
+
+        .page-title p {
+            color: var(--text-gray);
+            font-size: 0.9rem;
+        }
+
+        /* Cards & Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: var(--white);
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+        }
+
+        .card-title {
+            font-size: 0.9rem;
+            color: var(--text-gray);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Live Flow Animation */
+        .flow-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 150px;
+        }
+
+        .circle-meter {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 8px solid #eee;
+            border-top-color: var(--schneider-green);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            animation: spin-pulse 2s infinite linear;
+        }
+
+        .meter-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--schneider-dark);
+            animation: none;
+        }
+
+        .meter-unit {
+            font-size: 0.8rem;
+            color: var(--text-gray);
+            animation: none;
+        }
+
+        @keyframes spin-pulse {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Apartment Table Specifics */
+        .apt-table-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .apt-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .apt-table th {
+            text-align: left;
+            padding: 1rem;
+            background: #f9f9f9;
+            color: #555;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+        }
+
+        .apt-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #eee;
+            vertical-align: middle;
+        }
+
+        .apt-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-active {
+            background: #e6f7f2;
+            color: var(--schneider-green);
+        }
+
+        .status-offline {
+            background: #ffe6e6;
+            color: var(--danger);
+        }
+
+        .status-idle {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-blocked {
+            background: #e2e3e5;
+            color: #383d41;
+        }
+
+        .action-btn {
+            padding: 4px 8px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            margin-right: 5px;
+        }
+
+        .action-btn:hover {
+            background: #f0f0f0;
+        }
+
+        .action-btn.danger {
+            color: var(--danger);
+            border-color: #ffcccc;
+        }
+
+        .action-btn.danger:hover {
+            background: #fff0f0;
+        }
+
+        /* Alerts */
+        .alert-item {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem;
+            background: white;
+            border-left: 4px solid transparent;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            box-shadow: var(--shadow);
+        }
+
+        .alert-warning {
+            border-left-color: var(--warning);
+        }
+
+        .alert-danger {
+            border-left-color: var(--danger);
+        }
+
+        .alert-info {
+            border-left-color: var(--schneider-green);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .layout-wrapper {
+                flex-direction: column;
+                overflow-y: auto;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                padding: 1rem;
+                flex-direction: row;
+                justify-content: space-between;
+                border-bottom: 1px solid #eee;
+            }
+
+            .nav-menu {
+                display: none;
+            }
+
+            .user-profile {
+                display: none;
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+
+            .apt-table {
+                display: block;
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- 1. TELA DE LOGIN -->
+    <div id="login-screen">
+        <div class="login-card">
+            <div class="login-logo"><span>❖</span> Schneider <span>Electric</span></div>
+            <h3 style="margin-bottom: 1.5rem; color: #333;">Acesso ao Sistema</h3>
+
+            <form onsubmit="handleLogin(event)">
+                <div class="input-group">
+                    <label for="email">E-mail ou ID do Condomínio</label>
+                    <input type="email" id="email" placeholder="admin@condominio.com.br" required
+                        value="admin@demo.com">
+                </div>
+                <div class="input-group">
+                    <label for="password">Senha</label>
+                    <input type="password" id="password" placeholder="••••••••" required value="123456">
+                </div>
+                <button type="submit" class="btn-login">Entrar</button>
+                <p class="error-msg" id="login-error">Credenciais inválidas. Tente novamente.</p>
+            </form>
+            <p style="margin-top: 1.5rem; font-size: 0.8rem; color: #888;">Ambiente Seguro Schneider Electric © 2026</p>
+        </div>
+    </div>
+
+    <!-- 2. APLICAÇÃO PRINCIPAL (Escondida até login) -->
+    <div id="app-container">
+        <div class="layout-wrapper">
+            <!-- Sidebar -->
+            <nav class="sidebar">
+                <div class="logo"><span>❖</span> Schneider <span>Electric</span></div>
+                <ul class="nav-menu">
+                    <li class="nav-item"><a class="nav-link active" onclick="switchTab('home')">🏠 Visão Geral</a></li>
+                    <li class="nav-item"><a class="nav-link" onclick="switchTab('condo')">🏢 Apartamentos</a></li>
+                    <li class="nav-item"><a class="nav-link" onclick="switchTab('history')">📊 Histórico</a></li>
+                    <li class="nav-item"><a class="nav-link" onclick="switchTab('settings')">⚙️ Configurações</a></li>
+                </ul>
+                <div class="user-profile">
+                    <div class="avatar">JS</div>
+                    <div>
+                        <div style="font-weight: 600; font-size: 0.9rem;">João Silva</div>
+                        <div style="font-size: 0.75rem; color: #666;">Síndico Profissional</div>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Main Content -->
+            <main class="main-content">
+                <header class="header">
+                    <div class="page-title">
+                        <h1 id="page-header">Visão Geral</h1>
+                        <p>Condomínio Jardins do Sol - Torre A</p>
+                    </div>
+                    <button onclick="logout()"
+                        style="padding: 0.5rem 1rem; border: 1px solid #ddd; background: white; border-radius: 4px; cursor: pointer; color: #666;">
+                        Sair
+                    </button>
+                </header>
+
+                <!-- TAB 1: VISÃO GERAL -->
+                <div id="view-home">
+                    <div class="dashboard-grid">
+                        <!-- Card Potência -->
+                        <div class="card">
+                            <div class="card-header">
+                                <span class="card-title">Vazão Total (Potência)</span>
+                                <span style="color: var(--schneider-green); font-size: 0.8rem;">● Ao Vivo</span>
+                            </div>
+                            <div class="flow-container">
+                                <div class="circle-meter">
+                                    <span class="meter-value" id="live-kw">22.4</span>
+                                    <span class="meter-unit">kW</span>
+                                </div>
+                            </div>
+                            <div style="text-align: center; margin-top: 1rem;">
+                                <p style="font-size: 0.9rem; color: #666;">3 Veículos carregando simultaneamente</p>
+                            </div>
+                        </div>
+
+                        <!-- Card Consumo -->
+                        <div class="card">
+                            <div class="card-header"><span class="card-title">Consumo do Mês</span></div>
+                            <div style="margin-top: 1rem;">
+                                <span class="stat-big" style="font-size: 2.5rem;">1.240 kWh</span>
+                                <span class="stat-delta stat-up"
+                                    style="background: #e6f7f2; color: var(--schneider-green);">+5% vs mês
+                                    passado</span>
+                            </div>
+                            <div style="margin-top: 1.5rem; border-top: 1px solid #eee; padding-top: 1rem;">
+                                <span class="card-title">Custo Total Estimado</span>
+                                <div style="font-size: 1.5rem; font-weight: 600;">R$ 980,00</div>
+                            </div>
+                        </div>
+
+                        <!-- Card Alertas Rápidos -->
+                        <div class="card">
+                            <div class="card-header"><span class="card-title">Alertas Recentes</span></div>
+                            <div class="alert-item alert-warning" style="margin-bottom: 0.5rem; padding: 0.8rem;">
+                                <div style="font-size: 1.2rem;">⚠️</div>
+                                <div>
+                                    <h4 style="font-size: 0.9rem;">Pico de Demanda</h4>
+                                    <p style="font-size: 0.75rem; color: #666;">85% da capacidade usada às 19h.</p>
+                                </div>
+                            </div>
+                            <div class="alert-item alert-danger" style="margin-bottom: 0; padding: 0.8rem;">
+                                <div style="font-size: 1.2rem;">🛑</div>
+                                <div>
+                                    <h4 style="font-size: 0.9rem;">Erro Vaga 02</h4>
+                                    <p style="font-size: 0.75rem; color: #666;">Offline há 4 horas.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 2: GESTÃO POR APARTAMENTO (NOVO) -->
+                <div id="view-condo" style="display: none;">
+                    <div class="card" style="margin-bottom: 2rem; border: none; box-shadow: none; padding: 0;">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h3>Gestão por Unidade / Apartamento</h3>
+                            <div style="display: flex; gap: 10px;">
+                                <input type="text" placeholder="Buscar apto..."
+                                    style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
+                                <button class="btn-login" style="width: auto; padding: 0.5rem 1rem;">Filtrar</button>
+                            </div>
+                        </div>
+
+                        <div class="apt-table-container">
+                            <table class="apt-table">
+                                <thead>
+                                    <tr>
+                                        <th>Unidade</th>
+                                        <th>Morador</th>
+                                        <th>Veículo</th>
+                                        <th>Status</th>
+                                        <th>Consumo (Mês)</th>
+                                        <th>Saldo Pendente</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>#101</strong></td>
+                                        <td>Carlos Mendes</td>
+                                        <td>BYD Dolphin</td>
+                                        <td><span class="status-badge status-active">Carregando</span></td>
+                                        <td>120 kWh</td>
+                                        <td style="color: green;">Em dia</td>
+                                        <td>
+                                            <button class="action-btn">Ver Detalhes</button>
+                                            <button class="action-btn danger">Bloquear</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>#102</strong></td>
+                                        <td>Ana Souza</td>
+                                        <td>Tesla Model Y</td>
+                                        <td><span class="status-badge status-offline">Offline</span></td>
+                                        <td>0 kWh</td>
+                                        <td style="color: green;">Em dia</td>
+                                        <td>
+                                            <button class="action-btn">Reiniciar</button>
+                                            <button class="action-btn">Histórico</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>#205</strong></td>
+                                        <td>Pedro Alencar</td>
+                                        <td>Volvo XC40</td>
+                                        <td><span class="status-badge status-idle">Ocioso</span></td>
+                                        <td>85 kWh</td>
+                                        <td style="color: red; font-weight: bold;">R$ 45,00</td>
+                                        <td>
+                                            <button class="action-btn danger"
+                                                onclick="alert('Bloqueio realizado por inadimplência.')">Bloquear
+                                                (Inadimplente)</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>#301</strong></td>
+                                        <td>Julia Roberts</td>
+                                        <td>Fiat Fastback EV</td>
+                                        <td><span class="status-badge status-active">Carregando</span></td>
+                                        <td>45 kWh</td>
+                                        <td style="color: green;">Em dia</td>
+                                        <td>
+                                            <button class="action-btn">Ver Detalhes</button>
+                                            <button class="action-btn danger">Bloquear</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // --- LÓGICA DE LOGIN ---
+        function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const errorMsg = document.getElementById('login-error');
+
+            // Simulação simples de validação (Aceita qualquer coisa não vazia para demo, ou use admin/123456)
+            if (email && password.length >= 6) {
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('app-container').style.display = 'block';
+                startLiveSimulation();
+            } else {
+                errorMsg.style.display = 'block';
+            }
+        }
+
+        function logout() {
+            document.getElementById('app-container').style.display = 'none';
+            document.getElementById('login-screen').style.display = 'flex';
+            document.getElementById('password').value = '';
+        }
+
+        // --- LÓGICA DO DASHBOARD ---
+        function switchTab(tabName) {
+            // Update Menu Active State
+            document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+            event.currentTarget.classList.add('active'); // Nota: em produção, usar ID específico
+
+            // Hide Views
+            document.getElementById('view-home').style.display = 'none';
+            document.getElementById('view-condo').style.display = 'none';
+
+            // Show Selected
+            if (tabName === 'home') {
+                document.getElementById('view-home').style.display = 'block';
+                document.getElementById('page-header').innerText = 'Visão Geral';
+            } else if (tabName === 'condo') {
+                document.getElementById('view-condo').style.display = 'block';
+                document.getElementById('page-header').innerText = 'Gestão de Apartamentos';
+            } else {
+                // Placeholder para outras abas
+                document.getElementById('view-home').style.display = 'block';
+                alert("Esta aba está em desenvolvimento no MVP.");
+            }
+        }
+
+        // --- SIMULAÇÃO DE DADOS AO VIVO ---
+        function startLiveSimulation() {
+            setInterval(() => {
+                // Flutua a potência total entre 20kW e 25kW
+                const randomKW = (Math.random() * (25 - 20) + 20).toFixed(1);
+                const el = document.getElementById('live-kw');
+                if (el) el.innerText = randomKW;
+            }, 2000);
+        }
+    </script>
+</body>
+
+</html>
